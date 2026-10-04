@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ទែម៉ូម៉ែត្រឧស្ម័ន (Quiz 2)</title>
+    <script>MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$', '$$']] } };</script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+    <style>
+        body { font-family: 'Hanuman', 'Siemreap', Arial, sans-serif; background-color: #f4f6f9; padding: 20px; color: #111; text-align: center; margin: 0; }
+        .tab-container { display: flex; justify-content: center; margin-bottom: 20px; background: #1e293b; padding: 10px; border-radius: 8px; max-width: 1000px; margin: 0 auto 20px;}
+        .tab-btn { background: #334155; color: #cbd5e1; border: none; padding: 10px 20px; margin: 0 5px; font-size: 16px; border-radius: 8px; cursor: pointer; transition: 0.3s; font-family: inherit; font-weight: bold;}
+        .tab-btn.active { background: #38bdf8; color: #0f172a; }
+        .tab-btn.quiz-active { background: #2ecc71; color: white; }
+        .tab-content { display: none; max-width: 1000px; margin: 0 auto; }
+        .tab-content.active { display: block; }
+        
+        /* Sim Styles */
+        .problem-statement { background: #fff3cd; color: #664d03; padding: 18px 25px; border-radius: 8px; border-left: 6px solid #ffc107; text-align: left; margin-bottom: 20px; font-size: 17px; font-weight: bold; line-height: 1.8; box-shadow: 0 3px 6px rgba(0,0,0,0.08); }
+        .sim-area { position: relative; width: 100%; height: auto; background: #ffffff; border: 2px solid #b0bec5; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 8px rgba(0,0,0,0.1); margin: 0 auto 20px; display: block; padding-top: 10px; }
+        svg { display: block; width: 100%; height: auto; max-height: 500px; margin: 0 auto; }
+        .controls-grid { display: grid; grid-template-columns: 1fr; gap: 15px; margin-bottom: 20px; }
+        .slider-box { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); font-weight: bold; text-align: left; font-size: 15px; }
+        input[type=range] { width: 100%; margin-top: 10px; cursor: pointer; }
+        .btn-group { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
+        .btn-group button { color: white; padding: 12px 15px; font-size: 16px; font-weight: bold; border: none; border-radius: 8px; cursor: pointer; font-family: inherit;}
+        .btn-zero { background: #d32f2f; } .btn-triple { background: #0288d1; } .btn-boil { background: #e65100; }
+        .dashboard { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px; }
+        .data-box { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 3px 6px rgba(0,0,0,0.12); text-align: center; font-size: 15px; font-weight: bold; color: #333; }
+        .data-box span { font-weight: 900; font-size: 24px; display: block; margin-top: 8px; font-family: 'Arial', sans-serif; }
+        
+        /* Quiz Styles */
+        #quiz-container { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); text-align: left;}
+        .student-info { background: #e8f4f8; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+        .student-info select { width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 4px; font-family: inherit; font-size: 16px;}
+        .question-block { background: #fdfbfb; padding: 15px; border-left: 4px solid #3498db; margin-bottom: 15px; border-radius: 5px; }
+        .question-block p { font-weight: bold; margin-top: 0; }
+        .question-block label { display: block; margin-bottom: 8px; cursor: pointer; padding: 5px;}
+        .question-block label:hover {background: #e2e8f0; border-radius: 4px;}
+        .submit-btn { background: #2ecc71; color: white; border: none; padding: 12px; width: 100%; font-size: 16px; font-weight: bold; border-radius: 5px; cursor: pointer; font-family: inherit;}
+        .submit-btn:hover { background: #27ae60; }
+        
+        /* Modal */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; justify-content: center; align-items: center; }
+        .modal-box { background: white; padding: 30px; border-radius: 12px; text-align: center; width: 90%; max-width: 400px; }
+        .modal-box h3 { color: #2ecc71; margin-top: 0;}
+        .modal-btn { background: #3498db; color: white; border: none; padding: 10px 30px; font-size: 16px; border-radius: 6px; cursor: pointer; font-family: inherit; font-weight:bold;}
+    </style>
+</head>
+<body>
+    <div class="tab-container">
+        <button class="tab-btn active" onclick="openTab(event, 'sim-tab')">១. ការពិសោធន៍សូន្យដាច់ខាត</button>
+        <button class="tab-btn" onclick="openTab(event, 'quiz-tab')">២. កម្រងសំណួរ (Quiz ២)</button>
+    </div>
+
+    <!-- ផ្នែកទី១: ពិសោធន៍ -->
+    <div id="sim-tab" class="tab-content active">
+        <div class="problem-statement">
+            <strong>ការពិសោធន៍ទែម៉ូម៉ែត្រឧស្ម័ន៖</strong> គេវាស់សម្ពាធឧស្ម័ន ៣ ប្រភេទផ្សេងគ្នានៅមាឌថេរ។ ការពិសោធន៍បង្ហាញថា បើគេបន្លាយក្រាហ្វត្រលប់ក្រោយទៅរកសម្ពាធសូន្យ បន្ទាត់ទាំង ៣ នឹងទៅជួបគ្នានៅ <strong>-273.15°C (សូន្យដាច់ខាត)</strong>។
+        </div>
+        <div class="btn-group">
+            <button class="btn-zero" id="btnZero">❄️ សូន្យដាច់ខាត (-273.15 °C)</button>
+            <button class="btn-triple" id="btnTriple">💧 ចំណុចទ្រីបទឹក (0.01 °C)</button>
+            <button class="btn-boil" id="btnBoil">🔥 ចំណុចទឹកពុះ (100.00 °C)</button>
+        </div>
+        <div class="sim-area">
+            <svg viewBox="0 0 900 450" preserveAspectRatio="xMidYMid meet">
+                <line x1="80" y1="350" x2="850" y2="350" stroke="#e0e0e0" stroke-width="1"/>
+                <line x1="80" y1="250" x2="850" y2="250" stroke="#e0e0e0" stroke-width="1"/>
+                <line x1="80" y1="150" x2="850" y2="150" stroke="#e0e0e0" stroke-width="1"/>
+                <line x1="80" y1="50" x2="850" y2="50" stroke="#e0e0e0" stroke-width="1"/>
+                <line x1="580" y1="350" x2="580" y2="50" stroke="#e0e0e0" stroke-width="1"/>
+                <line x1="746" y1="350" x2="746" y2="50" stroke="#e0e0e0" stroke-width="1"/>
+                
+                <line x1="580" y1="350" x2="580" y2="30" stroke="#111" stroke-width="3"/>
+                <polygon points="580,20 575,35 585,35" fill="#111"/>
+                <text x="540" y="20" font-family="Arial" font-weight="bold" font-size="16">P (atm)</text>
+                <text x="560" y="255" font-family="Arial" font-size="14">1</text>
+                <text x="560" y="155" font-family="Arial" font-size="14">2</text>
+                <text x="560" y="55" font-family="Arial" font-size="14">3</text>
+
+                <line x1="80" y1="350" x2="850" y2="350" stroke="#111" stroke-width="3"/>
+                <polygon points="850,350 835,345 835,355" fill="#111"/>
+                <text x="810" y="380" font-family="Arial" font-weight="bold" font-size="16">t (°C)</text>
+                <text x="575" y="375" font-family="Arial" font-size="14">0</text>
+                <text x="735" y="375" font-family="Arial" font-size="14">100</text>
+
+                <circle cx="124.6" cy="350" r="5" fill="#d32f2f"/>
+                <text x="95" y="380" font-family="Arial" font-weight="bold" font-size="14" fill="#d32f2f">-273.15</text>
+
+                <line x1="124.6" y1="350" x2="580" y2="150" stroke="#1565c0" stroke-width="3" stroke-dasharray="8,4"/>
+                <line x1="580" y1="150" x2="830" y2="40" stroke="#1565c0" stroke-width="3"/>
+                <text x="820" y="30" font-family="Siemreap, Arial" font-weight="bold" font-size="14" fill="#1565c0">ឧស្ម័នទី ១</text>
+
+                <line x1="124.6" y1="350" x2="580" y2="216.7" stroke="#2e7d32" stroke-width="3" stroke-dasharray="8,4"/>
+                <line x1="580" y1="216.7" x2="830" y2="143.3" stroke="#2e7d32" stroke-width="3"/>
+                <text x="820" y="135" font-family="Siemreap, Arial" font-weight="bold" font-size="14" fill="#2e7d32">ឧស្ម័នទី ២</text>
+
+                <line x1="124.6" y1="350" x2="580" y2="283.3" stroke="#e65100" stroke-width="3" stroke-dasharray="8,4"/>
+                <line x1="580" y1="283.3" x2="830" y2="246.7" stroke="#e65100" stroke-width="3"/>
+                <text x="820" y="240" font-family="Siemreap, Arial" font-weight="bold" font-size="14" fill="#e65100">ឧស្ម័នទី ៣</text>
+
+                <g id="currentMarker">
+                    <line id="markerLineX" x1="580" y1="350" x2="580" y2="50" stroke="#ff1744" stroke-width="2" stroke-dasharray="4,2"/>
+                    <circle id="ptGas1" cx="580" cy="150" r="7" fill="#1565c0"/>
+                    <circle id="ptGas2" cx="580" cy="216.7" r="7" fill="#2e7d32"/>
+                    <circle id="ptGas3" cx="580" cy="283.3" r="7" fill="#e65100"/>
+                    <rect id="lblBox" x="550" y="390" width="60" height="25" fill="#ff1744" rx="4"/>
+                    <text id="lblCurrentT" x="580" y="408" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="14" fill="#fff">0 °C</text>
+                </g>
+            </svg>
+        </div>
+        <div class="controls-grid">
+            <div class="slider-box">
+                អូសដើម្បីផ្លាស់ប្តូរសីតុណ្ហភាព $t$ (°C):<br>
+                <span id="valT" style="color: #ff1744; font-size:24px; font-family:Arial;">0.00 °C</span>
+                <input type="range" id="sliderT" min="-273.15" max="150.00" value="0.00" step="0.01">
+            </div>
+        </div>
+        <div class="dashboard">
+            <div class="data-box" style="border-top: 4px solid #ff1744;">សីតុណ្ហភាព $t$<br><span id="dashT">0.00 °C</span></div>
+            <div class="data-box" style="border-top: 4px solid #9c27b0;">សីតុណ្ហភាព $T$<br><span id="dashK">273.15 K</span></div>
+            <div class="data-box" style="border-top: 4px solid #1565c0;">សម្ពាធឧស្ម័នទី១ $P_1$<br><span id="dashP1">2.000 atm</span></div>
+        </div>
+    </div>
+
+    <!-- ផ្នែកទី២: Quiz -->
+    <div id="quiz-tab" class="tab-content">
+        <div id="quiz-container">
+            <h2 style="text-align: center; color: #2c3e50;">កម្រងសំណួរតេស្តសមត្ថភាព+៖ សូន្យដាច់ខាត (៥០ ពិន្ទុ)</h2>
+            <div class="student-info">
+                <label><b>ជ្រើសរើសថ្នាក់៖</b></label>
+                <select id="classSelect" onchange="updateStudentList()"><option value="G10A">ថ្នាក់ទី ១០A</option><option value="G10B">ថ្នាក់ទី ១០B</option></select>
+                <label><b>ជ្រើសរើសឈ្មោះ៖</b></label>
+                <select id="nameSelect"></select>
+            </div>
+            
+            <div class="question-block">
+                <p>១. តើសីតុណ្ហភាពសូន្យដាច់ខាត (Absolute Zero) មានតម្លៃប៉ុន្មានគិតជាអង្សាសេ?</p>
+                <label><input type="radio" name="q1" value="0"> ក. 0 °C</label>
+                <label><input type="radio" name="q1" value="10"> ខ. -273.15 °C</label>
+                <label><input type="radio" name="q1" value="0"> គ. 100 °C</label>
+            </div>
+            <div class="question-block">
+                <p>២. តើមានអ្វីកើតឡើងចំពោះសម្ពាធឧស្ម័ននៅសីតុណ្ហភាពសូន្យដាច់ខាត (តាមទ្រឹស្តី)?</p>
+                <label><input type="radio" name="q2" value="0"> ក. កើនឡើងអតិបរមា</label>
+                <label><input type="radio" name="q2" value="10"> ខ. ស្មើនឹងសូន្យ (P = 0)</label>
+                <label><input type="radio" name="q2" value="0"> គ. រក្សាថេរជានិច្ច</label>
+            </div>
+            <div class="question-block">
+                <p>៣. រូបមន្តបំប្លែងពីអង្សាសេ (t) ទៅកែលវិន (T) គឺអ្វី?</p>
+                <label><input type="radio" name="q3" value="10"> ក. T = t + 273.15</label>
+                <label><input type="radio" name="q3" value="0"> ខ. T = t - 273.15</label>
+                <label><input type="radio" name="q3" value="0"> គ. T = t × 273.15</label>
+            </div>
+            <div class="question-block">
+                <p>៤. បើគេឱ្យឧស្ម័ននៅសីតុណ្ហភាពចំណុចទ្រីបទឹក តើសីតុណ្ហភាពនេះស្មើនឹងប៉ុន្មានអង្សាសេ?</p>
+                <label><input type="radio" name="q4" value="10"> ក. 0.01 °C</label>
+                <label><input type="radio" name="q4" value="0"> ខ. 100 °C</label>
+                <label><input type="radio" name="q4" value="0"> គ. -273.15 °C</label>
+            </div>
+            <div class="question-block">
+                <p>៥. តាមក្រាហ្វ ហេតុអ្វីបានជាបន្ទាត់ឧស្ម័នទាំង៣ត្រូវប្រើបន្ទាត់ដាច់ៗ (Dashed line) ពេលជិតដល់សូន្យដាច់ខាត?</p>
+                <label><input type="radio" name="q5" value="0"> ក. ព្រោះឧស្ម័នឆេះអស់</label>
+                <label><input type="radio" name="q5" value="10"> ខ. ព្រោះនៅសីតុណ្ហភាពទាបពេក ឧស្ម័នប្រែជាអង្គធាតុរាវ មិនអាចវាស់សម្ពាធជាឧស្ម័នបានទេ</label>
+                <label><input type="radio" name="q5" value="0"> គ. ព្រោះឧបករណ៍វាស់ខូច</label>
+            </div>
+            <button class="submit-btn" onclick="submitQuiz()">បញ្ជូនចម្លើយទៅកាន់គ្រូ</button>
+        </div>
+    </div>
+
+    <!-- លាក់ឈ្មោះសិស្សពី CSV -->
+    <div id="names-10A" style="display: none;">
+        <option value="អេង  សុវណ្ណថារី">អេង  សុវណ្ណថារី</option><option value="ហេង  ច័ន្ទអាយនីង">ហេង  ច័ន្ទអាយនីង</option><option value="ប៊ុន  ខត្តិយាវតី">ប៊ុន  ខត្តិយាវតី</option><option value="ប៉ាក  ច័ន្ទដាវីត">ប៉ាក  ច័ន្ទដាវីត</option><option value="អ៊ីវ  សុគន្ធបរមី">អ៊ីវ  សុគន្ធបរមី</option><option value="ភូ  លីណា">ភូ  លីណា</option><option value="ពន្លឺ  ពេជ្រចាន់ពិសិដ្ឋ">ពន្លឺ  ពេជ្រចាន់ពិសិដ្ឋ</option><option value="ប៉ុន  សុវណ្ណា">ប៉ុន  សុវណ្ណា</option><option value="ប៉ុន  សុវណ្ណលី">ប៉ុន  សុវណ្ណលី</option><option value="ភូ  សុគន្ធរ័ត្ន">ភូ  សុគន្ធរ័ត្ន</option><option value="ឡាយ  ស៊ុនអាន">ឡាយ  ស៊ុនអាន</option><option value="នួន  នីណា">នួន  នីណា</option><option value="ង៉ែត  សុគន្ធរក្សា">ង៉ែត  សុគន្ធរក្សា</option><option value="ហុក  គីមស៊ាន់">ហុក  គីមស៊ាន់</option><option value="សៀន  ពិសិដ្ឋ">សៀន  ពិសិដ្ឋ</option><option value="លី  សុរក្សា">លី  សុរក្សា</option><option value="គង់  ភារ៉ា">គង់  ភារ៉ា</option><option value="ខន  ស្រីនុត">ខន  ស្រីនុត</option><option value="រិទ្ធ  ទេវរបុត្រ">រិទ្ធ  ទេវរបុត្រ</option><option value="រាជ  បញ្ញាស័ក្តិ">រាជ  បញ្ញាស័ក្តិ</option><option value="គង់  សំរិទ្ធម៉ីលីង">គង់  សំរិទ្ធម៉ីលីង</option><option value="ស៊ី  អ៊ុយហុង">ស៊ី  អ៊ុយហុង</option><option value="សុខា  ម៉ានិច">សុខា  ម៉ានិច</option><option value="ផាត  សុវណ្ណវឌ្ឍនា">ផាត  សុវណ្ណវឌ្ឍនា</option><option value="ប៉ែន  សុខមាន">ប៉ែន  សុខមាន</option><option value="ឆេង  ឡុងហ៊ូន">ឆេង  ឡុងហ៊ូន</option><option value="គុយ  សុធីរាវិសិដ្ឋនាថ">គុយ  សុធីរាវិសិដ្ឋនាថ</option><option value="ម៉ៅ  ស្រីហេង">ម៉ៅ  ស្រីហេង</option><option value="ញ៉ុន  សំភី">ញ៉ុន  សំភី</option><option value="យ៉េត  ចន្ទចេស្តា">យ៉េត  ចន្ទចេស្តា</option>
+    </div>
+    <div id="names-10B" style="display: none;">
+        <option value="លីម​  នូស៊ីម">លីម​  នូស៊ីម</option><option value="មុន្នី  ករុណា">មុន្នី  ករុណា</option><option value="សុវណ្ណ  អាលីហ្សា">សុវណ្ណ  អាលីហ្សា</option><option value="ង៉ែត  ប៊ុនហ៊ួត">ង៉ែត  ប៊ុនហ៊ួត</option><option value="ហង្ស  ពេជ្រពិសី">ហង្ស  ពេជ្រពិសី</option><option value="ស៊ឹង សុវណ្ណរាជ្យ">ស៊ឹង សុវណ្ណរាជ្យ</option><option value="សម  សុបញ្ញា">សម  សុបញ្ញា</option><option value="វិន  សិលា">វិន  សិលា</option><option value="ធា  ណារី">ធា  ណារី</option><option value="សុខ  ពន្លឺ">សុខ  ពន្លឺ</option><option value="រុន  រស្មី">រុន  រស្មី</option><option value="ខូវ  ឡាយអ៊ូ">ខូវ  ឡាយអ៊ូ</option><option value="លីម  គីមឡេង">លីម  គីមឡេង</option><option value="ច័ន្ទ  ​សុខុមវីរៈបុត្រ">ច័ន្ទ  ​សុខុមវីរៈបុត្រ</option><option value="ជួង  ​សិទ្ធិរាជ">ជួង  ​សិទ្ធិរាជ</option><option value="ណាង​  ណយ">ណាង​  ណយ</option><option value="ថាន់  គឹមឡាយ">ថាន់  គឹមឡាយ</option><option value="ថា  គឹមឡុង">ថា  គឹមឡុង</option><option value="​សុខា​  ម៉ាសូជីន">​សុខា​  ម៉ាសូជីន</option><option value="ញ៉ែត សេង">ញ៉ែត សេង</option><option value="ទេព លីហ្សា">ទេព លីហ្សា</option><option value="ទ្រី លីហុង">ទ្រី លីហុង</option><option value="ម៉េង​ កែវពេជ្របូរម៉ី">ម៉េង​ កែវពេជ្របូរម៉ី</option><option value="វ៉ាត ជីហេង">វ៉ាត ជីហេង</option><option value="តាន់ ឈីងឈីង">តាន់ ឈីងឈីង</option>
+    </div>
+
+    <!-- Modal -->
+    <div id="successModal" class="modal-overlay"><div class="modal-box"><h3>✅ ជោគជ័យ!</h3><p id="modalMessage"></p><button class="modal-btn" onclick="closeModal()">OK (យល់ព្រម)</button></div></div>
+
+    <script>
+        function openTab(evt, tabName) {
+            document.querySelectorAll(".tab-content").forEach(el => el.style.display = "none");
+            document.querySelectorAll(".tab-btn").forEach(el => { el.classList.remove("active"); el.classList.remove("quiz-active"); });
+            document.getElementById(tabName).style.display = "block";
+            if(tabName === 'quiz-tab') evt.currentTarget.classList.add("quiz-active");
+            else evt.currentTarget.classList.add("active");
+        }
+        function updateStudentList() {
+            let cls = document.getElementById("classSelect").value;
+            let sel = document.getElementById("nameSelect");
+            sel.innerHTML = '<option value="">-- សូមជ្រើសរើសឈ្មោះរបស់អ្នក --</option>';
+            sel.innerHTML += document.getElementById(cls === "G10A" ? "names-10A" : "names-10B").innerHTML;
+        }
+        window.onload = updateStudentList;
+        function showModal(msg) { document.getElementById("modalMessage").innerText = msg; document.getElementById("successModal").style.display = "flex"; }
+        function closeModal() { document.getElementById("successModal").style.display = "none"; }
+
+        function submitQuiz() {
+            let cls = document.getElementById('classSelect').value;
+            let name = document.getElementById('nameSelect').value;
+            if (!cls || !name) return alert("សូមជ្រើសរើសឈ្មោះ និងថ្នាក់!");
+            let score = 0, count = 0;
+            for (let i = 1; i <= 5; i++) {
+                let rad = document.getElementsByName('q' + i);
+                for (let r of rad) if (r.checked) { score += parseInt(r.value); count++; break; }
+            }
+            if (count < 5) return alert("សូមឆ្លើយសំណួរឱ្យបានគ្រប់ទាំង ៥!");
+            
+            let btn = document.querySelector('.submit-btn'); btn.innerText = "កំពុងបញ្ជូន..."; btn.disabled = true;
+            
+            // ⚠️ ដាក់ Web App URL ថ្មីនៅទីនេះ ⚠️
+            const scriptURL = 'https://script.google.com/macros/s/AKfycbyDNNwB8ytz8sNuul7iYhWRu9FnbAAMumTKQ-3fUUDkmZpSrfFP2M2y3c-JbQymZWHEsg/exec';
+            let fd = new URLSearchParams();
+            fd.append("sheetName", cls); fd.append("name", name); fd.append("score", score); 
+            fd.append("quizNumber", "Q2"); // ចូល Q2 (Column F)
+
+            if(scriptURL.includes('YOUR_GOOGLE')) {
+                alert("សូមដាក់ Web App URL នៅក្នុងកូដជាមុនសិន!");
+                btn.innerText = "បញ្ជូនចម្លើយទៅកាន់គ្រូ"; btn.disabled = false; return;
+            }
+            fetch(scriptURL, { method: "POST", body: fd })
+            .then(r => r.text()).then(res => {
+                btn.innerText = "បញ្ជូនចម្លើយទៅកាន់គ្រូ"; btn.disabled = false;
+                if(res === "Success") showModal(`ពិន្ទុរបស់អ្នកទទួលបាន ${score}/50 ពិន្ទុ\nត្រូវបានបញ្ជូនចូលបញ្ជីថ្នាក់ ${cls} រួចរាល់!`);
+                else alert("មានបញ្ហា៖ " + res);
+            }).catch(err => { alert("មានបញ្ហាបណ្តាញទាក់ទង!"); btn.innerText = "បញ្ជូនចម្លើយទៅកាន់គ្រូ"; btn.disabled = false; });
+        }
+
+        // --- SIMULATION LOGIC ---
+        var sT = document.getElementById('sliderT');
+        var btnZero = document.getElementById('btnZero'), btnTriple = document.getElementById('btnTriple'), btnBoil = document.getElementById('btnBoil');
+        var markerLineX = document.getElementById('markerLineX'), ptGas1 = document.getElementById('ptGas1'), ptGas2 = document.getElementById('ptGas2'), ptGas3 = document.getElementById('ptGas3');
+        var lblBox = document.getElementById('lblBox'), lblCurrentT = document.getElementById('lblCurrentT');
+
+        var pxPerDeg = 1.6667, xOrigin = 580, yOrigin = 350, P0_1 = 2.0, P0_2 = 1.333, P0_3 = 0.667, pxPerAtm = 100;
+        var targetT = 0, currentTval = 0, isAnimating = false;
+
+        function startAnimation(t_target) { targetT = t_target; if (!isAnimating) { isAnimating = true; transitionLoop(); } }
+        btnZero.addEventListener('click', function() { startAnimation(-273.15); });
+        btnTriple.addEventListener('click', function() { startAnimation(0.01); });
+        btnBoil.addEventListener('click', function() { startAnimation(100.0); });
+
+        sT.addEventListener('input', function() { currentTval = parseFloat(sT.value); targetT = currentTval; isAnimating = false; updatePhysics(); });
+
+        function transitionLoop() {
+            var diff = targetT - currentTval;
+            if (Math.abs(diff).toFixed(2) !== "0.00") { currentTval += diff * 0.1; sT.value = currentTval; updatePhysics(); requestAnimationFrame(transitionLoop); }
+            else { currentTval = targetT; sT.value = currentTval; updatePhysics(); isAnimating = false; }
+        }
+
+        function updatePhysics() {
+            var t_C = currentTval, t_K = t_C + 273.15;
+            var p1 = P0_1 * (t_K / 273.15), p2 = P0_2 * (t_K / 273.15), p3 = P0_3 * (t_K / 273.15);
+
+            document.getElementById('valT').innerText = t_C.toFixed(2) + " °C";
+            document.getElementById('dashT').innerText = t_C.toFixed(2) + " °C";
+            document.getElementById('dashK').innerText = t_K.toFixed(2) + " K";
+            document.getElementById('dashP1').innerText = p1.toFixed(3) + " atm";
+
+            var xPos = xOrigin + (t_C * pxPerDeg);
+            markerLineX.setAttribute("x1", xPos); markerLineX.setAttribute("x2", xPos);
+            ptGas1.setAttribute("cx", xPos); ptGas1.setAttribute("cy", yOrigin - (p1 * pxPerAtm));
+            ptGas2.setAttribute("cx", xPos); ptGas2.setAttribute("cy", yOrigin - (p2 * pxPerAtm));
+            ptGas3.setAttribute("cx", xPos); ptGas3.setAttribute("cy", yOrigin - (p3 * pxPerAtm));
+            
+            lblBox.setAttribute("x", xPos - 30); lblCurrentT.setAttribute("x", xPos); lblCurrentT.textContent = t_C.toFixed(0) + " °C";
+
+            var isAbsoluteZero = (Math.max(t_C, -273.1) === -273.1);
+            if (isAbsoluteZero === false) { markerLineX.setAttribute("stroke", "#d32f2f"); lblBox.setAttribute("fill", "#d32f2f"); }
+            else { markerLineX.setAttribute("stroke", "#ff1744"); lblBox.setAttribute("fill", "#ff1744"); }
+        }
+        updatePhysics();
+    </script>
+</body>
+</html>
